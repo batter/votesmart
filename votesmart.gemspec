@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "votesmart"
-  s.version = "0.4.1"
+  s.version = "0.4.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
-  s.authors = ["Dan Cunning", "Ben Woosley"]
-  s.date = "2012-03-26"
+  s.authors = ["Dan Cunning", "Ben Woosley", "Mark J Steckel"]
+  s.date = "2014-09-19"
   s.description = "A wrapper for the Project Vote Smart API"
   s.email = "ben.woosley@gmail.com"
   s.extra_rdoc_files = [
