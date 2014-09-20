@@ -8,7 +8,7 @@ module VoteSmart
       @session ||= Typhoeus::Hydra.new(:max_concurrency => 20)
     end
 
-    def request_orig(api_method, params = {})
+    def request(api_method, params = {})
       raise "on_complete block required" unless block_given?
 
       url = construct_url api_method, params
@@ -27,6 +27,12 @@ module VoteSmart
       session.queue new_request
     end
 
+    def run
+      session.run
+    end
+  end
+
+  module SidekiqQueries
     #
     # Per comments at the following links, Typhoeus::Hydra can not
     # be used in a multi-threaded environment such as Sidekiq. 
@@ -35,7 +41,6 @@ module VoteSmart
     # https://github.com/typhoeus/ethon/issues/85
     # https://github.com/oscardelben/firebase-ruby/issues/15#issuecomment-46654551
     #
-
     def request(api_method, params = {})
       url = construct_url api_method, params
 
@@ -49,10 +54,6 @@ module VoteSmart
 
       json
     end
-
-    def run
-      session.run
-    end
   end
 
   class Common
@@ -63,6 +64,11 @@ module VoteSmart
       def parallelize!
         gem 'typhoeus'
         extend ParallelQueries
+      end
+
+      def sidekiqize!
+        gem 'typhoeus'
+        extend SidekiqQueries
       end
 
       def set_attribute_map map
