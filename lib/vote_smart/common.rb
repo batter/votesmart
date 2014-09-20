@@ -8,7 +8,7 @@ module VoteSmart
       @session ||= Typhoeus::Hydra.new(:max_concurrency => 20)
     end
 
-    def request(api_method, params = {})
+    def request_orig(api_method, params = {})
       raise "on_complete block required" unless block_given?
 
       url = construct_url api_method, params
@@ -25,6 +25,29 @@ module VoteSmart
         yield json
       end
       session.queue new_request
+    end
+
+    #
+    # Per comments at the following links, Typhoeus::Hydra can not
+    # be used in a multi-threaded environment such as Sidekiq. 
+    # Doing so causes seg faults in the Ethon gem.
+    #
+    # https://github.com/typhoeus/ethon/issues/85
+    # https://github.com/oscardelben/firebase-ruby/issues/15#issuecomment-46654551
+    #
+
+    def request(api_method, params = {})
+      url = construct_url api_method, params
+
+      request = Typhoeus::Request.new(url)
+      response = request.run
+      json = JSON.parse(response.body)
+
+      if json['error'] and json['error']['errorMessage'] == 'Authorization failed'
+        raise RequestFailed.new(json['error']['errorMessage'])
+      end
+
+      json
     end
 
     def run
