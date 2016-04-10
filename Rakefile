@@ -1,16 +1,5 @@
 %w[rubygems rake rake/clean fileutils].each { |f| require f }
 
-require 'jeweler'
-Jeweler::Tasks.new do |s|
-  s.name = "votesmart"
-  s.summary = "A wrapper for the Project Vote Smart API"
-  s.email = "ben.woosley@gmail.com"
-  s.homepage = "http://github.com/Empact/votesmart"
-  s.description = "A wrapper for the Project Vote Smart API"
-  s.authors = ["Dan Cunning", "Ben Woosley"]
-end
-Jeweler::GemcutterTasks.new
-
 Dir['tasks/**/*.rake'].each { |t| load t }
 
 require 'spec/rake/spectask'
@@ -35,4 +24,9 @@ RDoc::Task.new do |rdoc|
   rdoc.title = "votesmart #{version}"
   rdoc.rdoc_files.include('README*')
   rdoc.rdoc_files.include('lib/**/*.rb')
+end
+
+desc 'Open an irb session preloaded with this library'
+task :console do
+  sh 'irb -I lib -r vote_smart.rb'
 end
