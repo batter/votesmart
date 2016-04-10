@@ -35,7 +35,7 @@ module VoteSmart
     end
     
     # Returns an SIG's rating on a specific candidate
-    def self.get_candidate_rating candidate_id, sig_id, &block
+    def self.get_candidate_rating candidate_id, sig_id = nil, &block
       request("Rating.getCandidateRating", {"candidateId" => candidate_id, "sigId" => sig_id}, &block)
     end
     
