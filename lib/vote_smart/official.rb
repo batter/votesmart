@@ -1,44 +1,43 @@
 module VoteSmart
-  
   class Official < Common
-    
+
     attr_accessor :id, :first_name, :nick_name, :middle_name, :last_name, :suffix, :title,
                   :election_parties, :office_parties, :district_id, :district_name, :state_id
     
     attr_accessor :district, :office, :office_id, :party
-    
+
     set_attribute_map "candidateId" => :id, "firstName" => :first_name, "nickName" => :nick_name,
                       "middleName" => :middle_name, "lastName" => :last_name, "suffix" => :suffix,
                       "title" => :title, "electionParties" => :election_parties, "officeDistrictId" => :district_id,
                       "officeDistrictName" => :district_name, "officeParties" => :party, "officeStateId" => :state_id
-    
+
     def offices
       offices = Official.response_child(Address.get_office(self.id), "address", "office")
       (offices.is_a?(Array) ? offices : [offices]).collect {|office| 
         CandidateOffice.new(office)
       }
     end
-    
+
     def inspect
       "Official: " + [title, first_name, last_name].compact.join(' ')
     end
-    
+
     def office_id
       @office_id || (office.id if office)
     end
-    
+
     def self.find_by_district district
       official = find_by_district_id district.id
       official.district = district if official
       official.office = district.office if official
       official
     end
-    
+
     def self.find_by_district_id district_id
       response = response_child(get_by_district(district_id), "candidateList", "candidate")
       Official.new(response) unless response.empty?
     end
-    
+
     def self.find_by_office_id_and_state_id office_id, state_id
       response = response_child(get_by_office_state(office_id, state_id), "candidateList", "candidate")
       official = Official.new(response) unless response.empty?
@@ -46,7 +45,7 @@ module VoteSmart
       official.state_id ||= state_id if official
       official
     end
-    
+
     def self.find_all_by_address address, city, state, zip
       require 'ym4r/google_maps/geocoding'
 
@@ -102,31 +101,35 @@ module VoteSmart
 
       officials
     end
-    
+
     def self.get_statewide(state_id = 'NA')
       request("Officials.getStatewide", "stateId" => state_id)
     end
-    
+
     # Returns a list of incumbents that fit the criteria
     def self.get_by_office_state office_id, state_id = 'NA'
       request("Officials.getByOfficeState", "officeId" => office_id, "stateId" => state_id)
     end
-    
+
+    def self.get_by_office_type_state office_type_id, state_id = 'NA'
+      request("Officials.getByOfficeTypeState", "officeTypeId" => office_type_id, "stateId" => state_id)
+    end
+
     # Searches for incumbents with exact lastname matches
     def self.get_by_lastname lastname
       request("Officials.getByLastname", "lastName" => lastname)
     end
-    
+
     # Searches for incumbents with fuzzy lastname match
     def self.get_by_levenstein lastname
       request("Officials.getByLevenstein", "lastName" => lastname)
     end
-    
+
     # Returns incumbents in the provided election_id
     def self.get_by_election election_id
       request("Officials.getByElection", "electionId" => election_id)
     end
-    
+
     # Returns incumbents in the provided district_id
     def self.get_by_district district_id
       request("Officials.getByDistrict", "districtId" => district_id)
